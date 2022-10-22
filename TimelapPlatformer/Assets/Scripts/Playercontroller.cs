@@ -1,27 +1,59 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
-
+using TMPro;
 public class Playercontroller : MonoBehaviour
 {   
     private Rigidbody2D rd2d;
     public float speed;
-    public Text score;
-    private int scoreValue = 0;
+   
+    // Scoring & Life
+    public TextMeshProUGUI countText;
+    public GameObject winTextObject;
+    public GameObject loseTextObject;
+    public TextMeshProUGUI livesText;
+    private int count;
+    private int lives;
+
+    // Sprite & Animation
     Animator anim;
-    private bool facingRight = true;
+    private SpriteRenderer _renderer;
+    
     
     // Start is called before the first frame update
     void Start()
     {
         rd2d = GetComponent<Rigidbody2D>();
+
+        // Score n Lives
+        score = 0;
+        lives = 5;
         score.text = scoreValue.ToString();
+        lives.text = scoreValue.ToString(); 
+
+        // Animation
         anim = GetComponent<Animator>();
+
+        //Flip
+        _renderer = GetComponent<SpriteRenderer>();
+        if (_renderer == null)
+        {
+           Debug.LogError("Player Sprite is missing a renderer");
+        }
+        SetCountText();
     }
 
     void Update()
     {
+        //Flip
+          if (Input.GetAxisRaw("Horizontal") > 0)
+          {
+            _renderer.flipX = false;
+          }
+          else if (Input.GetAxisRaw("Horizontal") < 0)
+          {
+            _renderer.flipX = true;
+          }   
 
         //Right
         if (Input.GetKeyDown(KeyCode.D))
@@ -79,19 +111,13 @@ public class Playercontroller : MonoBehaviour
           
           anim.SetInteger("State", 0);
         }
-        //Character Flipping
-        animator.SetFloat("HorizontalValue", Mathf.Abs(Input.GetAxis("Horizontal")));
-        animator.SetFloat("VerticalValue", Input.GetAxis("Vertical"));
 
-        if (facingRight == false && hozMovement > 0)
-        {
-            Flip();
-        }
-
-        else if (facingRight == true && hozMovement < 0)
-        {
-            Flip();
-        }
+       float horizontal = Input.GetAxis("Horizontal");
+       float vertical = Input.GetAxis("Vertical");
+       Vector2 position = transform.position;
+       position.x = position.x + 3.0f * horizontal * Time.deltaTime;
+       position.y = position.y + 3.0f * vertical * Time.deltaTime;
+       transform.position = position;
 
     }
 
@@ -104,22 +130,26 @@ public class Playercontroller : MonoBehaviour
     }
      private void OnCollisionEnter2D(Collision2D collision)
     {
-       if (collision.collider.tag == "Coin")
+           if (collision.collider.tag == "Coin")
         {
-            scoreValue += 1;
-            score.text = scoreValue.ToString();
+            score = score + 1;
             Destroy(collision.collider.gameObject);
+            SetCountText();
         }
+        else if (collision.collider.tag == "Enemy")
+        {
+            lives = lives - 1;
+            SetCountText();
+        }
+        if (collision.collider.tag == "Death")
+        {
+            lives = lives - 1;
+            transform.position = new Vector3(0 , 0 , 0 );
+            SetCountText();
+        }
+
     }
 
-    //Flip scaler
-     void Flip()
-    {
-        facingRight = !facingRight;
-        Vector2 Scaler = transform.localScale;
-        Scaler.x = Scaler.x * -1;
-        transform.localScale = Scaler;
-    }
     private void OnCollisionStay2D(Collision2D collision)
     {
         if (collision.collider.tag == "Ground")
@@ -130,4 +160,6 @@ public class Playercontroller : MonoBehaviour
             }
         }
     }
+
+
 }
