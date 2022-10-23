@@ -8,12 +8,12 @@ public class Playercontroller : MonoBehaviour
     public float speed;
    
     // Scoring & Life
-    public TextMeshProUGUI countText;
+    public TextMeshProUGUI scoreText;
     public GameObject winTextObject;
     public GameObject loseTextObject;
     public TextMeshProUGUI livesText;
-    private int count;
-    private int lives;
+    private int scoreValue;
+    private int livesValue;
 
     // Sprite & Animation
     Animator anim;
@@ -23,13 +23,18 @@ public class Playercontroller : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+      //Score n Lives
         rd2d = GetComponent<Rigidbody2D>();
+        scoreValue = 0;
 
-        // Score n Lives
-        score = 0;
-        lives = 5;
-        score.text = scoreValue.ToString();
-        lives.text = scoreValue.ToString(); 
+        rd2d = GetComponent<Rigidbody2D>();
+        livesValue = 5;
+
+        SetCountText();
+        winTextObject.SetActive(false);
+
+        SetCountText();
+        loseTextObject.SetActive(false);
 
         // Animation
         anim = GetComponent<Animator>();
@@ -40,8 +45,21 @@ public class Playercontroller : MonoBehaviour
         {
            Debug.LogError("Player Sprite is missing a renderer");
         }
-        SetCountText();
+
     }
+    void SetCountText()
+    {
+        scoreText.text = "Score: " + scoreValue.ToString();
+
+        livesText.text = "Lives: " + livesValue.ToString();
+
+        if (scoreValue == 5)
+          {
+            transform.position = new Vector3(24, 0.9f, 0); //check 3
+          }
+
+    }
+
 
     void Update()
     {
@@ -128,25 +146,33 @@ public class Playercontroller : MonoBehaviour
         float vertMovement = Input.GetAxis("Vertical");
         rd2d.AddForce(new Vector2(hozMovement * speed, vertMovement * speed));
     }
+   
+   
      private void OnCollisionEnter2D(Collision2D collision)
     {
            if (collision.collider.tag == "Coin")
         {
-            score = score + 1;
+            scoreValue += 1;
             Destroy(collision.collider.gameObject);
             SetCountText();
         }
         else if (collision.collider.tag == "Enemy")
         {
-            lives = lives - 1;
+            livesValue = livesValue - 1;
             SetCountText();
         }
         if (collision.collider.tag == "Death")
         {
-            lives = lives - 1;
+            livesValue = livesValue - 1;
             transform.position = new Vector3(0 , 0 , 0 );
+            
             SetCountText();
         }
+        if (collision.collider.tag == "Death2")
+        {
+            livesValue = livesValue - 1;
+            transform.position = new Vector3(24 , 0.9f , 0 );
+        }    
 
     }
 
