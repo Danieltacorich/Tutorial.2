@@ -57,7 +57,10 @@ public class Playercontroller : MonoBehaviour
           {
             transform.position = new Vector3(24, 0.9f, 0); //check 3
           }
-
+        if (scoreValue == 10)
+          {
+            transform.position = new Vector3(-16, 18, 0);
+          }
     }
 
 
